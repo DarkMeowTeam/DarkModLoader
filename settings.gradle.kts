@@ -3,7 +3,8 @@ rootProject.name = "mod-loader"
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven("https://maven.luna5ama.dev/")
+        maven("https://darkmeowteam.github.io/maven/")
+        mavenLocal()
     }
 
     val kotlinVersion: String by settings
