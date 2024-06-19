@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Objects;
 
+@SuppressWarnings("CallToPrintStackTrace")
 public class GuiLoading {
     public JFrame frame;
 
@@ -25,8 +26,9 @@ public class GuiLoading {
 
         BufferedImage img;
         try {
-            img = ImageIO.read(Objects.requireNonNull(Main.class.getResourceAsStream("/resources/splash.png")));
+            img = ImageIO.read(Objects.requireNonNull(Main.class.getResourceAsStream("/splash.png")));
         } catch (Throwable e) {
+            e.printStackTrace();
             frame.dispose();
             return;
         }

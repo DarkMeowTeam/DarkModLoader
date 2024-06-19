@@ -2,6 +2,7 @@ package net.darkmeow.loader.core.utils;
 
 import net.darkmeow.loader.core.ui.GuiLoading;
 
+@SuppressWarnings("CallToPrintStackTrace")
 public class GuiLoadingUtils {
     public static void displayLoadingGui() {
         new Thread(() -> {
@@ -10,7 +11,9 @@ public class GuiLoadingUtils {
                 gui.init();
                 Thread.sleep(5000);
                 gui.close();
-            } catch (InterruptedException ignored) { }
-        });
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 }
