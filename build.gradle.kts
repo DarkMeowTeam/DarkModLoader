@@ -19,6 +19,11 @@ subprojects {
     base {
         archivesName.set("${rootProject.name}-${project.name}")
     }
+    tasks {
+        withType<JavaCompile> {
+            options.encoding = "UTF-8"
+        }
+    }
 }
 
 
