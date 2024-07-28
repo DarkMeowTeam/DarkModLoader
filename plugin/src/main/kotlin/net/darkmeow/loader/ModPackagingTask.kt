@@ -25,7 +25,6 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.io.OutputStream
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.zip.CRC32
 
@@ -81,7 +80,6 @@ abstract class ModPackagingTask : DefaultTask() {
             val zipOut = ZipArchiveOutputStream(output)
             zipOut.setMethod(ZipArchiveOutputStream.STORED)
             val channel = Channel<Pair<ZipArchiveEntry, ByteArray>>(Channel.BUFFERED)
-            val packageLists = ConcurrentHashMap<String, MutableSet<String>>()
 
             launch(Dispatchers.IO) {
                 for (entry in channel) {
@@ -89,30 +87,15 @@ abstract class ModPackagingTask : DefaultTask() {
                     zipOut.write(entry.second)
                     zipOut.closeArchiveEntry()
                 }
-
-                val crc32 = CRC32()
-                for ((platform, packages) in packageLists) {
-                    val entry = ZipArchiveEntry("$platform/package-list.txt")
-                    val bytes = packages.sorted().joinToString("\n").toByteArray(Charsets.UTF_8)
-
-                    crc32.reset()
-                    crc32.update(bytes)
-                    entry.crc = crc32.value
-                    entry.size = bytes.size.toLong()
-
-                    zipOut.putArchiveEntry(entry)
-                    zipOut.write(bytes)
-                    zipOut.closeArchiveEntry()
-                }
             }
 
             coroutineScope {
                 defaultPlatform.orNull?.let {
-                    pack(platformJars.get().singleFile, it.id, packageLists, channel)
+                    pack(platformJars.get().singleFile, it.id, channel)
                 } ?: run {
                     platformJars.get().forEach { file ->
                         val platform = ModPlatform.entries.find { file.name.contains(it.id) } ?: return@forEach
-                        pack(file, platform.id, packageLists, channel)
+                        pack(file, platform.id, channel)
                     }
                 }
             }
@@ -124,7 +107,6 @@ abstract class ModPackagingTask : DefaultTask() {
     private fun CoroutineScope.pack(
         input: File,
         platform: String,
-        packageLists: MutableMap<String, MutableSet<String>>,
         channel: Channel<Pair<ZipArchiveEntry, ByteArray>>
     ) {
         launch(Dispatchers.IO) {
@@ -142,12 +124,6 @@ abstract class ModPackagingTask : DefaultTask() {
                         "$platform-libs"
                     } else {
                         platform
-                    }
-
-                    if (isClass) {
-                        val packageName = entryIn.name.substringBeforeLast('/').replace('/', '.')
-                        packageLists.computeIfAbsent(dir) { Collections.newSetFromMap(ConcurrentHashMap()) }
-                            .add(packageName)
                     }
 
                     val entryOut = ZipArchiveEntry("$dir/${entryIn.name}")
