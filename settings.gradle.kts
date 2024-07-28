@@ -7,9 +7,8 @@ pluginManagement {
         mavenLocal()
     }
 
-    val kotlinVersion: String by settings
     plugins {
-        id("org.jetbrains.kotlin.jvm").version(kotlinVersion)
+        id("org.jetbrains.kotlin.jvm").version("2.0.0")
     }
 }
 
