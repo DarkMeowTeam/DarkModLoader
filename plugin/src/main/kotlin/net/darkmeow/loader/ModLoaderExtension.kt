@@ -6,10 +6,10 @@ import javax.inject.Inject
 
 @Suppress("LeakingThis")
 abstract class ModLoaderExtension {
+    abstract val directClass: Property<String>
     abstract val modName: Property<String>
     abstract val modPackage: Property<String>
     abstract val forgeModClass: Property<String>
-    abstract val defaultPlatform: Property<ModPlatform>
     abstract val mcVersion: Property<String>
 
     @get:Inject

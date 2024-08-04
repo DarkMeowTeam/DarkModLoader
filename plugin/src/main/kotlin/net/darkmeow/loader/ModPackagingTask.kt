@@ -25,7 +25,6 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.io.OutputStream
-import java.util.concurrent.ConcurrentHashMap
 import java.util.zip.CRC32
 
 abstract class ModPackagingTask : DefaultTask() {
@@ -45,10 +44,6 @@ abstract class ModPackagingTask : DefaultTask() {
     @get:Optional
     @get:Input
     internal abstract val splitLibs: SetProperty<String>
-
-    @get:Optional
-    @get:Input
-    internal abstract val defaultPlatform: Property<ModPlatform>
 
     @get:InputFiles
     internal abstract val platformJars: Property<FileCollection>
@@ -90,14 +85,7 @@ abstract class ModPackagingTask : DefaultTask() {
             }
 
             coroutineScope {
-                defaultPlatform.orNull?.let {
-                    pack(platformJars.get().singleFile, it.id, channel)
-                } ?: run {
-                    platformJars.get().forEach { file ->
-                        val platform = ModPlatform.entries.find { file.name.contains(it.id) } ?: return@forEach
-                        pack(file, platform.id, channel)
-                    }
-                }
+                pack(platformJars.get().singleFile, channel)
             }
 
             channel.close()
@@ -106,14 +94,13 @@ abstract class ModPackagingTask : DefaultTask() {
 
     private fun CoroutineScope.pack(
         input: File,
-        platform: String,
         channel: Channel<Pair<ZipArchiveEntry, ByteArray>>
     ) {
         launch(Dispatchers.IO) {
             val filterName = forgeModClass.map { "${it.replace('.', '/')}.*\\.class".toRegex() }.orNull
             val packagePath = modPackage.get().replace('.', '/')
             val crc32 = CRC32()
-            val splitLibs = splitLibs.get().contains(platform)
+            val splitLibs = splitLibs.get().contains("package")
             ZipArchiveInputStream(input.inputStream().buffered(16 * 1024)).use {
                 while (true) {
                     val entryIn = it.nextEntry ?: break
@@ -121,9 +108,9 @@ abstract class ModPackagingTask : DefaultTask() {
                     val isClass = entryIn.name.endsWith(".class")
 
                     val dir = if (splitLibs && isClass && !entryIn.name.startsWith(packagePath)) {
-                        "$platform-libs"
+                        "package-libs"
                     } else {
-                        platform
+                        "package"
                     }
 
                     val entryOut = ZipArchiveEntry("$dir/${entryIn.name}")

@@ -1,6 +1,6 @@
 package net.darkmeow.loader.core.ui;
 
-import net.darkmeow.loader.core.Main;
+import net.darkmeow.loader.DirectLoader;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -26,7 +26,7 @@ public class GuiLoading {
 
         BufferedImage img;
         try {
-            img = ImageIO.read(Objects.requireNonNull(Main.class.getResourceAsStream("/splash.png")));
+            img = ImageIO.read(Objects.requireNonNull(DirectLoader.class.getResourceAsStream("/splash.png")));
         } catch (Throwable e) {
             e.printStackTrace();
             frame.dispose();

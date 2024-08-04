@@ -1,6 +1,6 @@
 allprojects {
     group = "net.darkmeow"
-    version = "1.0"
+    version = "1.0.0804"
 }
 
 plugins {

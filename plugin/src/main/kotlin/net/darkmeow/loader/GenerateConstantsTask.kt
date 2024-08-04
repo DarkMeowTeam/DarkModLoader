@@ -16,6 +16,9 @@ import javax.inject.Inject
 @Suppress("LeakingThis")
 abstract class GenerateConstantsTask : DefaultTask() {
     @get:Input
+    internal abstract val directClass: Property<String>
+
+    @get:Input
     internal abstract val modName: Property<String>
 
     @get:Input
@@ -24,10 +27,6 @@ abstract class GenerateConstantsTask : DefaultTask() {
     @get:Optional
     @get:Input
     internal abstract val forgeModClass: Property<String>
-
-    @get:Optional
-    @get:Input
-    internal abstract val defaultPlatform: Property<ModPlatform>
 
     @get:InputFiles
     internal abstract val platformJars: Property<FileCollection>
@@ -97,54 +96,8 @@ abstract class GenerateConstantsTask : DefaultTask() {
         val resourcesDir = resourcesDir.asFile.get()
         resourcesDir.mkdirs()
 
-        defaultPlatform.orNull?.let {
-            val file = platformJars.get().singleFile
-            when (it) {
-                ModPlatform.FABRIC -> fabric(file, mixinConfigs, resourcesDir)
-                ModPlatform.FORGE -> forge(file, mixinConfigs, resourcesDir)
-            }
-        } ?: run {
-            platformJars.get().files.find {
-                it.name.contains(ModPlatform.FABRIC.id)
-            }?.let { file ->
-                fabric(file, mixinConfigs, resourcesDir)
-            }
-
-            platformJars.get().files.find {
-                it.name.contains(ModPlatform.FORGE.id)
-            }?.let { file ->
-                forge(file, mixinConfigs, resourcesDir)
-            }
-        }
-    }
-
-    private fun fabric(file: File, mixinConfigs: MutableList<String>, resourcesDir: File) {
-        val gson = GsonBuilder().setPrettyPrinting().create()
-        val zipTree = project.zipTree(file)
-
-        zipTree.findByName("fabric.mod.json")?.let { fabricModJson ->
-            val json = JsonParser.parseString(fabricModJson.readText()).asJsonObject
-
-            val entrypoints = json.getAsJsonObject("entrypoints")
-                ?: JsonObject().apply { json.add("entrypoints", this) }
-            entrypoints.add("preLaunch", JsonArray().apply {
-                add("${modPackage.get()}.FabricLoader")
-            })
-
-            json.getAsJsonArray("mixins").forEach {
-                mixinConfigs.add("fabric:${it.asString}")
-            }
-
-            json.remove("mixins")
-
-            json.get("accessWidener")?.asString?.let { accessWidener ->
-                zipTree.findByName(accessWidener)?.copyTo(File(resourcesDir, accessWidener), true)
-            }
-
-            File(resourcesDir, "fabric.mod.json").bufferedWriter().use {
-                gson.toJson(json, it)
-            }
-        }
+        val file = platformJars.get().singleFile
+        forge(file, mixinConfigs, resourcesDir)
     }
 
     private fun forge(file: File, mixinConfigs: MutableList<String>, resourcesDir: File) {
@@ -181,7 +134,8 @@ abstract class GenerateConstantsTask : DefaultTask() {
                     it.copyTo(File(resourcesDir, "$forgeModPackage/${it.name}"), true)
                 }
         }
-        newManifest.mainAttributes[Attributes.Name("Main-Class")] = "${modPackage.get()}.core.Main"
+        newManifest.mainAttributes[Attributes.Name("Main-Class")] = "${modPackage.get()}.DirectLoader"
+        newManifest.mainAttributes[Attributes.Name("DarkLoader-DirectClass")] = directClass.get()
 
 
         manifestFile.get().asFile.outputStream().use { newManifest.write(it) }

@@ -8,7 +8,6 @@ plugins {
 }
 
 repositories {
-    maven("https://maven.fabricmc.net/")
     maven("https://maven.minecraftforge.net/")
 }
 
@@ -60,7 +59,7 @@ publishing {
             from(components["java"])
             groupId = "net.darkmeow"
             artifactId = "mod-loader-plugin"
-            version = "1.0"
+            version = "1.0.0804"
         }
     }
     repositories {

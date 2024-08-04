@@ -20,7 +20,6 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class Loader {
-    public static final Logger LOGGER = LogManager.getLogger();
     public static final File SYSTEM_DIR = new File("darkmeow-loader");
     public static final File LOADER_DIR = new File(SYSTEM_DIR, "loader");
 
@@ -34,13 +33,13 @@ public class Loader {
         return mixins.toArray(new String[0]);
     }
 
-    public static URL loadMod(String modName, String platform) {
-        return load(modName, platform);
+    public static URL loadMod(String modName) {
+        return load(modName);
     }
 
-    private static URL load(String modName, String classifier) {
+    private static URL load(String modName) {
         try {
-            File file = loadFile(modName, classifier);
+            File file = loadFile(modName);
             return file.toURI().toURL();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -48,13 +47,12 @@ public class Loader {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private static File loadFile(String modName, String classifier) throws IOException, NoSuchAlgorithmException {
+    private static File loadFile(String modName) throws IOException, NoSuchAlgorithmException {
         SYSTEM_DIR.mkdirs();
         LOADER_DIR.mkdirs();
         Files.getFileAttributeView(SYSTEM_DIR .toPath(), DosFileAttributeView.class).setHidden(true);
-        String fileName = modName + "-" + classifier;
-        File jarFile = new File(LOADER_DIR, fileName + ".jar");
-        File checksumFile = new File(LOADER_DIR, fileName + ".sha512");
+        File jarFile = new File(LOADER_DIR, modName + ".jar");
+        File checksumFile = new File(LOADER_DIR, modName + ".sha512");
         String cachedCheckSum = null;
         if (jarFile.exists() && checksumFile.exists()) {
             try (BufferedReader reader = new BufferedReader(new FileReader(checksumFile))) {
@@ -72,10 +70,7 @@ public class Loader {
             checksum = toHexString(md.digest(bytes));
         }
 
-        LOGGER.debug("Checksum: " + checksum);
-
         if (checksum.equals(cachedCheckSum)) {
-            LOGGER.debug("Using cached " + fileName + ".jar");
             return jarFile;
         }
 
@@ -84,7 +79,7 @@ public class Loader {
             zipOut.setLevel(Deflater.BEST_COMPRESSION);
             try (ZipInputStream tarIn = getZipIn(bytes)) {
                 ZipEntry entryIn;
-                String pathPrefix = classifier + "/";
+                String pathPrefix = "package/";
                 byte[] buffer = new byte[1024];
                 while ((entryIn = tarIn.getNextEntry()) != null) {
                     if (entryIn.getName().startsWith(pathPrefix)) {

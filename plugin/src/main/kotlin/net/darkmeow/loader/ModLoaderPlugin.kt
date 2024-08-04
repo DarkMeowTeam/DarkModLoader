@@ -21,16 +21,10 @@ class ModLoaderPlugin : Plugin<Project> {
         project.dependencies.add(runtimeConfiguration.name, "net.darkmeow:mod-loader-runtime:$version")
 
         project.afterEvaluate {
-            val mcVersion = extension.mcVersion.get()
-            val ver = mcVersion.split('.')[1].toIntOrNull() ?: 0
-            if (ver >= 13) {
-                project.dependencies.add(runtimeConfiguration.name, "net.darkmeow:mod-loader-runtime:$version:fabric")
-            } else {
-                project.dependencies.add(
-                    runtimeConfiguration.name,
-                    "net.darkmeow:mod-loader-runtime:$version:legacy-forge"
-                )
-            }
+            project.dependencies.add(
+                runtimeConfiguration.name,
+                "net.darkmeow:mod-loader-runtime:$version:legacy-forge"
+            )
         }
 
         val generateConstants =
@@ -38,10 +32,10 @@ class ModLoaderPlugin : Plugin<Project> {
                 generateConstants.dependsOn(platforms)
                 generateConstants.dependsOn(platforms.get().artifacts)
 
+                generateConstants.directClass.set(extension.directClass)
                 generateConstants.modName.set(extension.modName)
                 generateConstants.modPackage.set(extension.modPackage.map { "${it}Loader" })
                 generateConstants.forgeModClass.set(extension.forgeModClass)
-                generateConstants.defaultPlatform.set(extension.defaultPlatform)
                 generateConstants.platformJars.set(platformJarFiles)
             }
 
@@ -76,7 +70,6 @@ class ModLoaderPlugin : Plugin<Project> {
             modPackaging.splitLibs.add(extension.mcVersion.map {
                 if ((it.split('.')[1].toIntOrNull() ?: 0) >= 18) "forge" else ""
             })
-            modPackaging.defaultPlatform.set(extension.defaultPlatform)
             modPackaging.platformJars.set(platformJarFiles)
         }
 
