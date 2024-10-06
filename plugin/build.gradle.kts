@@ -17,7 +17,6 @@ dependencies {
 
     implementation("org.apache.commons:commons-compress:1.26.0")
 
-    implementation("com.google.code.gson:gson:2.10")
     implementation("org.ow2.asm:asm-commons:9.4")
     implementation("org.ow2.asm:asm-tree:9.4")
 }

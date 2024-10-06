@@ -1,9 +1,6 @@
 package net.darkmeow.loader
 
-import org.gradle.api.Action
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-import org.gradle.api.Task
+import org.gradle.api.*
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.compile.JavaCompile
@@ -34,7 +31,6 @@ class ModLoaderPlugin : Plugin<Project> {
 
                 generateConstants.directClass.set(extension.directClass)
                 generateConstants.modName.set(extension.modName)
-                generateConstants.modPackage.set(extension.modPackage.map { "${it}Loader" })
                 generateConstants.forgeModClass.set(extension.forgeModClass)
                 generateConstants.platformJars.set(platformJarFiles)
             }
@@ -64,7 +60,6 @@ class ModLoaderPlugin : Plugin<Project> {
             modPackaging.dependsOn(platforms.get().artifacts)
 
             modPackaging.modName.set(extension.modName)
-            modPackaging.modPackage.set(extension.modPackage)
             modPackaging.forgeModClass.set(extension.forgeModClass)
 
             modPackaging.splitLibs.add(extension.mcVersion.map {
@@ -74,7 +69,6 @@ class ModLoaderPlugin : Plugin<Project> {
         }
 
         val remapRuntimeTask = project.tasks.create("remapRuntime", RemapRuntimeTask::class.java) { remapRuntime ->
-            remapRuntime.modPackage.set(extension.modPackage.map { "${it}Loader" })
             remapRuntime.runtimeJars.setFrom(runtimeConfiguration)
         }
 

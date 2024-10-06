@@ -1,6 +1,5 @@
 package net.darkmeow.loader
 
-import com.google.gson.*
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
@@ -20,9 +19,6 @@ abstract class GenerateConstantsTask : DefaultTask() {
 
     @get:Input
     internal abstract val modName: Property<String>
-
-    @get:Input
-    internal abstract val modPackage: Property<String>
 
     @get:Optional
     @get:Input
@@ -81,11 +77,11 @@ abstract class GenerateConstantsTask : DefaultTask() {
     }
 
     private fun generateClasses(mixinConfigs: List<String>) {
-        val dir = File(File(sourcesDir.asFile.get(), modPackage.get().replace('.', '/')), "core")
+        val dir = File(File(sourcesDir.asFile.get(), "net.darkmeow.loader".replace('.', '/')), "core")
         dir.mkdirs()
         File(dir, "Constants.java").writeText(
             constantsSrc.format(
-                "${modPackage.get()}.core",
+                "net.darkmeow.loader.core",
                 modName.get(),
                 mixinConfigs.joinToString(",")
             )
@@ -104,7 +100,7 @@ abstract class GenerateConstantsTask : DefaultTask() {
         val zipTree = project.zipTree(file)
         val newManifest = Manifest()
         newManifest.mainAttributes[Attributes.Name.MANIFEST_VERSION] = "1.0"
-        newManifest.mainAttributes[Attributes.Name("FMLCorePlugin")] = "${modPackage.get()}.LegacyForgeLoader"
+        newManifest.mainAttributes[Attributes.Name("FMLCorePlugin")] = "net.darkmeow.loader.LegacyForgeLoader"
 
         zipTree.findByName("MANIFEST.MF")?.let { oldManifestFile ->
             val manifest = Manifest(oldManifestFile.inputStream())
@@ -134,7 +130,7 @@ abstract class GenerateConstantsTask : DefaultTask() {
                     it.copyTo(File(resourcesDir, "$forgeModPackage/${it.name}"), true)
                 }
         }
-        newManifest.mainAttributes[Attributes.Name("Main-Class")] = "${modPackage.get()}.DirectLoader"
+        newManifest.mainAttributes[Attributes.Name("Main-Class")] = "net.darkmeow.loader.DirectLoader"
         newManifest.mainAttributes[Attributes.Name("DarkLoader-DirectClass")] = directClass.get()
 
 

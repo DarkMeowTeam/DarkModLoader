@@ -4,24 +4,15 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
-import org.objectweb.asm.ClassReader
-import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.commons.ClassRemapper
-import org.objectweb.asm.commons.Remapper
-import org.objectweb.asm.tree.ClassNode
 import java.io.File
 import java.util.zip.ZipInputStream
 import javax.inject.Inject
 
 @Suppress("LeakingThis")
 abstract class RemapRuntimeTask : DefaultTask() {
-    @get:Input
-    internal abstract val modPackage: Property<String>
 
     @get:InputFiles
     internal abstract val runtimeJars: ConfigurableFileCollection
@@ -42,21 +33,11 @@ abstract class RemapRuntimeTask : DefaultTask() {
         output.deleteRecursively()
         output.mkdirs()
 
-        val packageRegex = "net.darkmeow.loader".toRegex()
-        val newPackage = modPackage.get()
-        val newInternalPackage = newPackage.replace('.', '/')
-
-        val remapper = object : Remapper() {
-            override fun map(internalName: String): String {
-                return internalName.replace(packageRegex, newInternalPackage)
-            }
-        }
-
         runtimeJars.forEach {
             ZipInputStream(it.inputStream().buffered(16 * 1024)).use { zipIn ->
                 while (true) {
                     val entry = zipIn.nextEntry ?: break
-                    val fileTo = File(output, entry.name.replace(packageRegex, newInternalPackage))
+                    val fileTo = File(output, entry.name)
                     when {
                         entry.isDirectory -> {
                             // Ignored
@@ -64,22 +45,12 @@ abstract class RemapRuntimeTask : DefaultTask() {
                         entry.name.startsWith("META-INF/services/") -> {
                             val text = zipIn.readBytes().toString(Charsets.UTF_8)
                             fileTo.parentFile.mkdirs()
-                            fileTo.writeText(text.replace(packageRegex, newPackage))
+                            fileTo.writeText(text)
                         }
                         entry.name.endsWith(".class") -> {
                             val bytes = zipIn.readBytes()
-                            val classReader = ClassReader(bytes)
-                            val inputNode = ClassNode()
-                            classReader.accept(inputNode, 0)
-
-                            val outputNode = ClassNode()
-                            val classRemapper = ClassRemapper(outputNode, remapper)
-                            inputNode.accept(classRemapper)
-
-                            val classWriter = ClassWriter(classReader, 0)
-                            outputNode.accept(classWriter)
                             fileTo.parentFile.mkdirs()
-                            fileTo.writeBytes(classWriter.toByteArray())
+                            fileTo.writeBytes(bytes)
                         }
                         else -> {
                             fileTo.parentFile.mkdirs()

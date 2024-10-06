@@ -23,16 +23,6 @@ public class Loader {
     public static final File SYSTEM_DIR = new File("darkmeow-loader");
     public static final File LOADER_DIR = new File(SYSTEM_DIR, "loader");
 
-    public static String[] getMixinConfigs(String platform) {
-        List<String> mixins = new ArrayList<>();
-        for (String line : Constants.MIXIN_CONFIGS.split(",")) {
-            if (line.startsWith(platform + ":")) {
-                mixins.add(line.substring(platform.length() + 1));
-            }
-        }
-        return mixins.toArray(new String[0]);
-    }
-
     public static URL loadMod(String modName) {
         return load(modName);
     }

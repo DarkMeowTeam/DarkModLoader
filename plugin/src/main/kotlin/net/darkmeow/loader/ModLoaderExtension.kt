@@ -8,7 +8,6 @@ import javax.inject.Inject
 abstract class ModLoaderExtension {
     abstract val directClass: Property<String>
     abstract val modName: Property<String>
-    abstract val modPackage: Property<String>
     abstract val forgeModClass: Property<String>
     abstract val mcVersion: Property<String>
 

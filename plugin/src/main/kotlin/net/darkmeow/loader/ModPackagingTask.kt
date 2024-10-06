@@ -31,9 +31,6 @@ abstract class ModPackagingTask : DefaultTask() {
     @get:Input
     internal abstract val modName: Property<String>
 
-    @get:Input
-    internal abstract val modPackage: Property<String>
-
     @get:Optional
     @get:Input
     internal abstract val forgeModClass: Property<String>
@@ -98,20 +95,13 @@ abstract class ModPackagingTask : DefaultTask() {
     ) {
         launch(Dispatchers.IO) {
             val filterName = forgeModClass.map { "${it.replace('.', '/')}.*\\.class".toRegex() }.orNull
-            val packagePath = modPackage.get().replace('.', '/')
             val crc32 = CRC32()
-            val splitLibs = splitLibs.get().contains("package")
             ZipArchiveInputStream(input.inputStream().buffered(16 * 1024)).use {
                 while (true) {
                     val entryIn = it.nextEntry ?: break
                     if (filterName != null && filterName.matches(entryIn.name)) continue
-                    val isClass = entryIn.name.endsWith(".class")
 
-                    val dir = if (splitLibs && isClass && !entryIn.name.startsWith(packagePath)) {
-                        "package-libs"
-                    } else {
-                        "package"
-                    }
+                    val dir = "package"
 
                     val entryOut = ZipArchiveEntry("$dir/${entryIn.name}")
                     if (!entryIn.isDirectory) {
