@@ -77,7 +77,7 @@ publishing {
             from(components["java"])
             groupId = "net.darkmeow"
             artifactId = "mod-loader-runtime"
-            version = "1.0.0927"
+            version = "1.0.1006"
 
 
             artifact(legacyForgeJar) {
