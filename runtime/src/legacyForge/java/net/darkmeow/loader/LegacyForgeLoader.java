@@ -2,7 +2,7 @@ package net.darkmeow.loader;
 
 import net.darkmeow.loader.core.Constants;
 import net.darkmeow.loader.core.Loader;
-import net.darkmeow.loader.core.utils.GuiLoadingUtils;
+import net.darkmeow.loader.core.ui.GuiLoading;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
@@ -17,7 +17,8 @@ public class LegacyForgeLoader implements IFMLLoadingPlugin {
 
     public LegacyForgeLoader() {
         try {
-            GuiLoadingUtils.displayLoadingGui();
+            GuiLoading.display();
+
             LaunchClassLoader launchClassLoader = Launch.classLoader;
             ClassLoader appClassLoader = LaunchClassLoader.class.getClassLoader();
 

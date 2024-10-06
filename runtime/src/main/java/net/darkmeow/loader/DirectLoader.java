@@ -2,7 +2,7 @@ package net.darkmeow.loader;
 
 import net.darkmeow.loader.core.Constants;
 import net.darkmeow.loader.core.Loader;
-import net.darkmeow.loader.core.utils.GuiLoadingUtils;
+import net.darkmeow.loader.core.ui.GuiLoading;
 
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -13,7 +13,7 @@ public class DirectLoader {
 
     @SuppressWarnings("all")
     public static void main(String[] args) {
-        GuiLoadingUtils.displayLoadingGui();
+        GuiLoading.display();
         try (URLClassLoader classLoader = new URLClassLoader(new URL[]{UNPACKED_MOD}, DirectLoader.class.getClassLoader())) {
             Class<?> mainClass = classLoader.loadClass(new java.util.jar.Manifest(DirectLoader.class.getResourceAsStream("/META-INF/MANIFEST.MF")).getMainAttributes().getValue("DarkLoader-DirectClass"));
             Method mainMethod = mainClass.getDeclaredMethod("main", String[].class);
