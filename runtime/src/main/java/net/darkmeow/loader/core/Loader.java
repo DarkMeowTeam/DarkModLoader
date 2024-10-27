@@ -1,18 +1,13 @@
 package net.darkmeow.loader.core;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.tukaani.xz.XZInputStream;
 
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.attribute.DosFileAttributeView;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
@@ -20,8 +15,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class Loader {
-    public static final File SYSTEM_DIR = new File("darkmeow-loader");
-    public static final File LOADER_DIR = new File(SYSTEM_DIR, "loader");
+    public static final File LOADER_DIR = new File(new File(System.getProperty("java.io.tmpdir")), "DarkLoader");
 
     public static URL loadMod(String modName) {
         return load(modName);
@@ -38,9 +32,8 @@ public class Loader {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private static File loadFile(String modName) throws IOException, NoSuchAlgorithmException {
-        SYSTEM_DIR.mkdirs();
         LOADER_DIR.mkdirs();
-        Files.getFileAttributeView(SYSTEM_DIR .toPath(), DosFileAttributeView.class).setHidden(true);
+
         File jarFile = new File(LOADER_DIR, modName + ".jar");
         File checksumFile = new File(LOADER_DIR, modName + ".sha512");
         String cachedCheckSum = null;

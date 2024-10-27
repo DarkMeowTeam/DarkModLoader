@@ -6,7 +6,6 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 import java.util.Objects;
 
 @SuppressWarnings("CallToPrintStackTrace")
@@ -17,27 +16,10 @@ public class GuiLoading {
             try {
                 GuiLoading gui = new GuiLoading();
                 gui.init();
+
                 Thread.sleep(5000);
 
-                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        for (int attempts = 0; attempts < 100; attempts++) {
-                            if (Arrays.stream(Window.getWindows()).anyMatch(window -> "LWJGL".equals(window.getName()))) {
-                                return null; // 找到窗口，结束任务
-                            }
-                            Thread.sleep(200);
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    protected void done() {
-                        gui.close();
-                    }
-                };
-
-                worker.execute();
+                gui.close();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -72,13 +54,6 @@ public class GuiLoading {
 
         JLabel label = new JLabel(new ImageIcon(img));
         panel.add(label, BorderLayout.CENTER);
-
-        JProgressBar progressBar = new JProgressBar();
-        progressBar.setIndeterminate(true);
-        progressBar.setString(" ");
-        progressBar.setStringPainted(false);
-        progressBar.setPreferredSize(new Dimension(progressBar.getPreferredSize().width, 4));
-        panel.add(progressBar, BorderLayout.SOUTH);
 
         frame.getContentPane().add(panel);
         frame.pack();
