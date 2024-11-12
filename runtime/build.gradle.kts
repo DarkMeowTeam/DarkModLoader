@@ -1,5 +1,5 @@
 plugins {
-    id("net.darkmeow.jar-optimizer").version("1.0")
+    id("net.darkmeow.jar-optimizer").version("1.0.1113")
     id("com.github.johnrengelman.shadow").version("7.1.2")
     id("maven-publish")
 }
@@ -30,8 +30,6 @@ java {
 
 dependencies {
     implementation("org.tukaani:xz:1.9")
-
-    compileOnly("org.apache.logging.log4j:log4j-api:2.8.1")
 
     "legacyForgeCompileOnly"("net.minecraft:launchwrapper:1.12") { isTransitive = false }
     "legacyForgeCompileOnly"("net.minecraftforge:forge:1.12.2-14.23.5.2860:universal") { isTransitive = false }
@@ -77,7 +75,7 @@ publishing {
             from(components["java"])
             groupId = "net.darkmeow"
             artifactId = "mod-loader-runtime"
-            version = "1.0.1023"
+            version = "1.0.1113"
 
 
             artifact(legacyForgeJar) {
