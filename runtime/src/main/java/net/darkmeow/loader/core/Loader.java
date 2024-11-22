@@ -1,5 +1,6 @@
 package net.darkmeow.loader.core;
 
+import net.darkmeow.loader.DirectLoader;
 import org.tukaani.xz.XZInputStream;
 
 import java.io.*;
@@ -17,8 +18,8 @@ import java.util.zip.ZipOutputStream;
 public class Loader {
     public static final File LOADER_DIR = new File(new File(System.getProperty("java.io.tmpdir")), "DarkLoader");
 
-    public static URL loadMod(String modName) {
-        return load(modName);
+    public static URL loadMod() throws IOException {
+        return load(new java.util.jar.Manifest(DirectLoader.class.getResourceAsStream("/META-INF/MANIFEST.MF")).getMainAttributes().getValue("DarkLoader-ModName"));
     }
 
     private static URL load(String modName) {
@@ -47,7 +48,7 @@ public class Loader {
 
         byte[] bytes;
         String checksum;
-        try (InputStream is = Objects.requireNonNull(getModPackageStream(modName))) {
+        try (InputStream is = Objects.requireNonNull(getModPackageStream())) {
             bytes = readBytes(is);
             MessageDigest md = MessageDigest.getInstance("SHA-512");
             checksum = toHexString(md.digest(bytes));
@@ -86,8 +87,8 @@ public class Loader {
         return jarFile;
     }
 
-    private static InputStream getModPackageStream(String modName) {
-        return Loader.class.getClassLoader().getResourceAsStream(modName + ".encrypt");
+    private static InputStream getModPackageStream() {
+        return Loader.class.getClassLoader().getResourceAsStream("META-INF/NATIVE");
     }
 
     private static String toHexString(byte[] bytes) {

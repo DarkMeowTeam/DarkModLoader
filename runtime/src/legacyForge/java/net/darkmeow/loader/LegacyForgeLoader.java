@@ -1,6 +1,5 @@
 package net.darkmeow.loader;
 
-import net.darkmeow.loader.core.Constants;
 import net.darkmeow.loader.core.Loader;
 import net.darkmeow.loader.core.ui.GuiLoading;
 import net.minecraft.launchwrapper.Launch;
@@ -13,19 +12,19 @@ import java.net.URLClassLoader;
 import java.util.Map;
 
 public class LegacyForgeLoader implements IFMLLoadingPlugin {
-    public static final URL UNPACKED_MOD = Loader.loadMod(Constants.MOD_NAME);
-
     public LegacyForgeLoader() {
         try {
             GuiLoading.display();
+
+            final URL unPackedMod = Loader.loadMod();
 
             LaunchClassLoader launchClassLoader = Launch.classLoader;
             ClassLoader appClassLoader = LaunchClassLoader.class.getClassLoader();
 
             Method addURLMethod = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
             addURLMethod.setAccessible(true);
-            addURLMethod.invoke(appClassLoader, UNPACKED_MOD);
-            addURLMethod.invoke(launchClassLoader, UNPACKED_MOD);
+            addURLMethod.invoke(appClassLoader, unPackedMod);
+            addURLMethod.invoke(launchClassLoader, unPackedMod);
 
             Class<?> mixinBootstrap = Class.forName(
                 "org.spongepowered.asm.launch.MixinBootstrap",

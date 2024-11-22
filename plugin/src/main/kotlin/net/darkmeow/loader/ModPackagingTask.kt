@@ -14,15 +14,11 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
 import java.io.File
 import java.io.OutputStream
 import java.util.zip.CRC32
@@ -45,17 +41,17 @@ abstract class ModPackagingTask : DefaultTask() {
     @get:InputFiles
     internal abstract val platformJars: Property<FileCollection>
 
-    @get:OutputFile
-    internal abstract val outputFile: RegularFileProperty
+    @get:OutputDirectory
+    internal abstract val outputFile: DirectoryProperty
 
     init {
-        outputFile.set(modName.map { project.layout.buildDirectory.file("mod-loader/packed/${it}.encrypt").get() })
+        outputFile.set(project.layout.buildDirectory.dir("mod-loader/packed"))
         dictSize.convention(4 * 1024 * 1024)
     }
 
     @TaskAction
     fun packageMod() {
-        val outputFile = outputFile.get().asFile
+        val outputFile = File(File(outputFile.get().asFile, "META-INF"), "NATIVE")
         outputFile.parentFile.mkdirs()
 
         val rawStream = outputFile.outputStream().buffered(16 * 1024)

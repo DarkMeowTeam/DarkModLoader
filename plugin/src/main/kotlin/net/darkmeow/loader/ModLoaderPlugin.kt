@@ -1,11 +1,9 @@
 package net.darkmeow.loader
 
-import org.gradle.api.*
+import org.gradle.api.Plugin
+import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.jvm.tasks.Jar
-import org.gradle.jvm.toolchain.JavaToolchainService
 
 class ModLoaderPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -24,35 +22,14 @@ class ModLoaderPlugin : Plugin<Project> {
             )
         }
 
-        val generateConstants =
-            project.tasks.create("generateConstants", GenerateConstantsTask::class.java) { generateConstants ->
-                generateConstants.dependsOn(platforms)
-                generateConstants.dependsOn(platforms.get().artifacts)
+        val generateConstants = project.tasks.create("generateConstants", GenerateConstantsTask::class.java) { generateConstants ->
+            generateConstants.dependsOn(platforms)
+            generateConstants.dependsOn(platforms.get().artifacts)
 
-                generateConstants.directClass.set(extension.directClass)
-                generateConstants.modName.set(extension.modName)
-                generateConstants.forgeModClass.set(extension.forgeModClass)
-                generateConstants.platformJars.set(platformJarFiles)
-            }
-
-        val compileConstants = project.tasks.create("compileConstants", JavaCompile::class.java) { compileConstants ->
-            compileConstants.javaCompiler.set(
-                project.extensions.getByType(JavaToolchainService::class.java)
-                    .compilerFor(project.extensions.getByType(JavaPluginExtension::class.java).toolchain)
-            )
-
-            compileConstants.classpath = project.files()
-            compileConstants.source(generateConstants.sourcesDir)
-            compileConstants.destinationDirectory.set(project.layout.buildDirectory.dir("classes/mod-loader"))
-
-            @Suppress("ObjectLiteralToLambda")
-            compileConstants.actions.add(0, object : Action<Task> {
-                override fun execute(t: Task) {
-                    val file = compileConstants.destinationDirectory.asFile.get()
-                    file.deleteRecursively()
-                    file.mkdirs()
-                }
-            })
+            generateConstants.directClass.set(extension.directClass)
+            generateConstants.modName.set(extension.modName)
+            generateConstants.forgeModClass.set(extension.forgeModClass)
+            generateConstants.platformJars.set(platformJarFiles)
         }
 
         val modPackaging = project.tasks.create("modPackaging", ModPackagingTask::class.java) { modPackaging ->
@@ -75,7 +52,6 @@ class ModLoaderPlugin : Plugin<Project> {
         val modLoaderJar = project.tasks.create("modLoaderJar", Jar::class.java) { modLoaderJar ->
             modLoaderJar.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             modLoaderJar.dependsOn(generateConstants)
-            modLoaderJar.from(compileConstants.destinationDirectory)
             modLoaderJar.from(remapRuntimeTask.outputs)
             modLoaderJar.from(generateConstants.resourcesDir) {
                 it.exclude("MANIFEST.MF")

@@ -51,7 +51,6 @@ tasks {
         configurations = listOf(project.configurations.runtimeClasspath.get())
 
         relocate("org.tukaani", "net.darkmeow.loader")
-        exclude("net/darkmeow/loader/core/Constants.class")
     }
 }
 
@@ -71,16 +70,12 @@ artifacts {
 
 publishing {
     publications {
-        create<MavenPublication>("mavenJava") {
-            from(components["java"])
-            groupId = "net.darkmeow"
+        create<MavenPublication>("runtime") {
             artifactId = "mod-loader-runtime"
-            version = "1.0.1113"
-
-
-            artifact(legacyForgeJar) {
-                classifier = "legacy-forge"
+            artifact(optimizeJar) {
+                classifier = ""
             }
+            artifact(legacyForgeJar)
         }
     }
     repositories {

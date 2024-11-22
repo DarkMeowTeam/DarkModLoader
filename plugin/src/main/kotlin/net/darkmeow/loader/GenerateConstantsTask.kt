@@ -45,15 +45,6 @@ abstract class GenerateConstantsTask : DefaultTask() {
         manifestFile.set(resourcesDir.file("META-INF/MANIFEST.MF"))
     }
 
-    private val constantsSrc = """
-        package %s;
-
-        public class Constants {
-            public static String MOD_NAME = "%s";
-            public static String MIXIN_CONFIGS = "%s";
-        }
-    """.trimIndent()
-
     @TaskAction
     fun run() {
         val sourceDir = sourcesDir.get().asFile
@@ -73,19 +64,6 @@ abstract class GenerateConstantsTask : DefaultTask() {
         manifestFile.createNewFile()
 
         generateResources(mixinConfigs)
-        generateClasses(mixinConfigs)
-    }
-
-    private fun generateClasses(mixinConfigs: List<String>) {
-        val dir = File(File(sourcesDir.asFile.get(), "net.darkmeow.loader".replace('.', '/')), "core")
-        dir.mkdirs()
-        File(dir, "Constants.java").writeText(
-            constantsSrc.format(
-                "net.darkmeow.loader.core",
-                modName.get(),
-                mixinConfigs.joinToString(",")
-            )
-        )
     }
 
     private fun generateResources(mixinConfigs: MutableList<String>) {
@@ -132,6 +110,7 @@ abstract class GenerateConstantsTask : DefaultTask() {
         }
         newManifest.mainAttributes[Attributes.Name("Main-Class")] = "net.darkmeow.loader.DirectLoader"
         newManifest.mainAttributes[Attributes.Name("DarkLoader-DirectClass")] = directClass.get()
+        newManifest.mainAttributes[Attributes.Name("DarkLoader-ModName")] = modName.get()
 
 
         manifestFile.get().asFile.outputStream().use { newManifest.write(it) }

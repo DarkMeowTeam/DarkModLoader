@@ -31,8 +31,7 @@ public class GuiLoading {
     public void init() {
         frame = new JFrame();
 
-        //noinspection SpellCheckingInspection
-        frame.setTitle("JinLiang Shield");
+        frame.setTitle("");
 
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.getContentPane().setBackground(Color.DARK_GRAY);
