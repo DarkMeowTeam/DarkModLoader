@@ -27,7 +27,6 @@ class ModLoaderPlugin : Plugin<Project> {
             generateConstants.dependsOn(platforms.get().artifacts)
 
             generateConstants.directClass.set(extension.directClass)
-            generateConstants.modName.set(extension.modName)
             generateConstants.forgeModClass.set(extension.forgeModClass)
             generateConstants.platformJars.set(platformJarFiles)
         }
@@ -36,12 +35,7 @@ class ModLoaderPlugin : Plugin<Project> {
             modPackaging.dependsOn(platforms)
             modPackaging.dependsOn(platforms.get().artifacts)
 
-            modPackaging.modName.set(extension.modName)
             modPackaging.forgeModClass.set(extension.forgeModClass)
-
-            modPackaging.splitLibs.add(extension.mcVersion.map {
-                if ((it.split('.')[1].toIntOrNull() ?: 0) >= 18) "forge" else ""
-            })
             modPackaging.platformJars.set(platformJarFiles)
         }
 

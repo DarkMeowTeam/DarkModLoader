@@ -1,6 +1,5 @@
 package net.darkmeow.loader.core;
 
-import net.darkmeow.loader.DirectLoader;
 import org.tukaani.xz.XZInputStream;
 
 import java.io.*;
@@ -9,6 +8,7 @@ import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
@@ -18,13 +18,13 @@ import java.util.zip.ZipOutputStream;
 public class Loader {
     public static final File LOADER_DIR = new File(new File(System.getProperty("java.io.tmpdir")), "DarkLoader");
 
-    public static URL loadMod() throws IOException {
-        return load(new java.util.jar.Manifest(DirectLoader.class.getResourceAsStream("/META-INF/MANIFEST.MF")).getMainAttributes().getValue("DarkLoader-ModName"));
+    public static URL loadMod() {
+        return load();
     }
 
-    private static URL load(String modName) {
+    private static URL load() {
         try {
-            File file = loadFile(modName);
+            File file = loadFile();
             return file.toURI().toURL();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -32,29 +32,22 @@ public class Loader {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private static File loadFile(String modName) throws IOException, NoSuchAlgorithmException {
+    private static File loadFile() throws IOException, NoSuchAlgorithmException {
         LOADER_DIR.mkdirs();
 
-        File jarFile = new File(LOADER_DIR, modName + ".jar");
-        File checksumFile = new File(LOADER_DIR, modName + ".sha512");
-        String cachedCheckSum = null;
-        if (jarFile.exists() && checksumFile.exists()) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(checksumFile))) {
-                cachedCheckSum = reader.readLine();
-            } catch (IOException e) {
-                // ignored
-            }
-        }
-
         byte[] bytes;
-        String checksum;
+        final String checksum;
         try (InputStream is = Objects.requireNonNull(getModPackageStream())) {
             bytes = readBytes(is);
             MessageDigest md = MessageDigest.getInstance("SHA-512");
             checksum = toHexString(md.digest(bytes));
         }
 
-        if (checksum.equals(cachedCheckSum)) {
+        // 不能移除 jar 后缀
+        // 否则会破坏 Reflections
+        File jarFile = new File(LOADER_DIR, checksum.toLowerCase(Locale.ROOT) + ".jar");
+
+        if (jarFile.exists()) {
             return jarFile;
         }
 
@@ -76,12 +69,6 @@ public class Loader {
                     }
                 }
             }
-        }
-
-        try (Writer writer = new FileWriter(checksumFile)) {
-            writer.write(checksum);
-        } catch (IOException e) {
-            // ignored
         }
 
         return jarFile;

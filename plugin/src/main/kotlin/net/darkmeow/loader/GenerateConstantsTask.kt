@@ -17,9 +17,6 @@ abstract class GenerateConstantsTask : DefaultTask() {
     @get:Input
     internal abstract val directClass: Property<String>
 
-    @get:Input
-    internal abstract val modName: Property<String>
-
     @get:Optional
     @get:Input
     internal abstract val forgeModClass: Property<String>
@@ -110,7 +107,6 @@ abstract class GenerateConstantsTask : DefaultTask() {
         }
         newManifest.mainAttributes[Attributes.Name("Main-Class")] = "net.darkmeow.loader.DirectLoader"
         newManifest.mainAttributes[Attributes.Name("DarkLoader-DirectClass")] = directClass.get()
-        newManifest.mainAttributes[Attributes.Name("DarkLoader-ModName")] = modName.get()
 
 
         manifestFile.get().asFile.outputStream().use { newManifest.write(it) }

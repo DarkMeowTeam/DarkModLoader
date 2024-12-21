@@ -63,7 +63,7 @@ publishing {
             from(components["java"])
             groupId = "net.darkmeow"
             artifactId = "mod-loader-plugin"
-            version = "1.0.1122"
+            version = "1.0.1221"
         }
     }
     repositories {

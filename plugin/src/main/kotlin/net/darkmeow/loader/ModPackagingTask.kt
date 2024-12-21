@@ -17,15 +17,12 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import java.io.File
 import java.io.OutputStream
 import java.util.zip.CRC32
 
 abstract class ModPackagingTask : DefaultTask() {
-    @get:Input
-    internal abstract val modName: Property<String>
 
     @get:Optional
     @get:Input
@@ -33,10 +30,6 @@ abstract class ModPackagingTask : DefaultTask() {
 
     @get:Input
     abstract val dictSize: Property<Int>
-
-    @get:Optional
-    @get:Input
-    internal abstract val splitLibs: SetProperty<String>
 
     @get:InputFiles
     internal abstract val platformJars: Property<FileCollection>
