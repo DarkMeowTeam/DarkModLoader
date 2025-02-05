@@ -1,6 +1,6 @@
 allprojects {
     group = "net.darkmeow"
-    version = "1.0.1221"
+    version = "1.1.0205"
 }
 
 plugins {
@@ -13,7 +13,11 @@ subprojects {
     }
 
     repositories {
-        mavenCentral()
+        mavenLocal()
+        maven("https://maven.aliyun.com/repository/central/") // mavenCentral()
+
+        maven("https://maven-minecraft.mirror.nekocurit.asia/") // https://maven.minecraftforge.net/
+        maven("https://libraries.minecraft.net/")
     }
 
     base {

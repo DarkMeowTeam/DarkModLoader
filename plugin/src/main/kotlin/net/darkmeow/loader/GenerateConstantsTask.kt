@@ -14,12 +14,18 @@ import javax.inject.Inject
 
 @Suppress("LeakingThis")
 abstract class GenerateConstantsTask : DefaultTask() {
+
+    @get:Optional
     @get:Input
     internal abstract val directClass: Property<String>
 
     @get:Optional
     @get:Input
     internal abstract val forgeModClass: Property<String>
+
+    @get:Optional
+    @get:Input
+    internal abstract val verifyClass: Property<String>
 
     @get:InputFiles
     internal abstract val platformJars: Property<FileCollection>
@@ -54,49 +60,36 @@ abstract class GenerateConstantsTask : DefaultTask() {
 
         File(resourceDir, "META-INF").mkdirs()
 
-        val mixinConfigs = mutableListOf<String>()
-
         val manifestFile = manifestFile.get().asFile
         manifestFile.parentFile.mkdirs()
         manifestFile.createNewFile()
 
-        generateResources(mixinConfigs)
+        generateResources()
+        generateClasses()
     }
 
-    private fun generateResources(mixinConfigs: MutableList<String>) {
+    private fun generateResources() {
         val resourcesDir = resourcesDir.asFile.get()
         resourcesDir.mkdirs()
 
         val file = platformJars.get().singleFile
-        forge(file, mixinConfigs, resourcesDir)
+        forge(file, resourcesDir)
     }
 
-    private fun forge(file: File, mixinConfigs: MutableList<String>, resourcesDir: File) {
+    private fun forge(file: File, resourcesDir: File) {
         val zipTree = project.zipTree(file)
         val newManifest = Manifest()
         newManifest.mainAttributes[Attributes.Name.MANIFEST_VERSION] = "1.0"
-        newManifest.mainAttributes[Attributes.Name("FMLCorePlugin")] = "net.darkmeow.loader.LegacyForgeLoader"
+        newManifest.mainAttributes[Attributes.Name("FMLCorePlugin")] = "net.darkmeow.loader.loaders.LegacyForgeLoader"
 
-        zipTree.findByName("MANIFEST.MF")?.let { oldManifestFile ->
-            val manifest = Manifest(oldManifestFile.inputStream())
-
-            manifest.mainAttributes.getValue("MixinConfigs")
-                ?.split(',')?.mapTo(mixinConfigs) { "forge:$it" }
-
-            manifest.mainAttributes.getValue("FMLAT")?.let { atName ->
-                val atFile = zipTree.findByName(atName)
-                    ?: throw IllegalStateException("Could not find access transformer file $atName")
-                atFile.copyTo(File(resourcesDir, "META-INF/$atName"), true)
-
-                newManifest.mainAttributes[Attributes.Name("FMLAT")] = atName
-            }
-        }
+        // 模组信息
+        @Suppress("SpellCheckingInspection")
+        zipTree.findByName("mcmod.info")?.copyTo(File(resourcesDir, "mcmod.info"), true)
+        // 模组内置材质包信息
+        zipTree.findByName("pack.mcmeta")?.copyTo(File(resourcesDir, "pack.mcmeta"), true)
 
         forgeModClass.orNull?.let { forgeModClass ->
             newManifest.mainAttributes[Attributes.Name("FMLCorePluginContainsFMLMod")] = "true"
-            zipTree.findByName("mcmod.info")?.copyTo(File(resourcesDir, "mcmod.info"), true)
-            zipTree.findByName("pack.mcmeta")?.copyTo(File(resourcesDir, "pack.mcmeta"), true)
-            zipTree.findByName("mods.toml")?.copyTo(File(resourcesDir, "META-INF/mods.toml"), true)
             val forgeModClassRegex = "$forgeModClass.*\\.class".toRegex()
             val forgeModPackage = forgeModClass.substringBeforeLast('.').replace('.', '/')
             zipTree
@@ -105,14 +98,34 @@ abstract class GenerateConstantsTask : DefaultTask() {
                     it.copyTo(File(resourcesDir, "$forgeModPackage/${it.name}"), true)
                 }
         }
-        newManifest.mainAttributes[Attributes.Name("Main-Class")] = "net.darkmeow.loader.DirectLoader"
-        newManifest.mainAttributes[Attributes.Name("DarkLoader-DirectClass")] = directClass.get()
 
+        // 直接运行 jar 执行
+        newManifest.mainAttributes[Attributes.Name("Main-Class")] = "net.darkmeow.loader.loaders.DirectLoader"
 
         manifestFile.get().asFile.outputStream().use { newManifest.write(it) }
     }
 
     private fun Iterable<File>.findByName(name: String): File? {
         return find { it.name == name }
+    }
+
+    private val constantsSrc = """
+        package net.darkmeow.loader.core;
+
+        public final class Constants {
+            public static String DIRECT_CLASS = "%s";
+            public static String VERIFY_CLASS = "%s";
+        }
+    """.trimIndent()
+
+    private fun generateClasses() {
+        val dir = File(sourcesDir.asFile.get(), "net/darkmeow/loader/core")
+        dir.mkdirs()
+        File(dir, "Constants.java").writeText(
+            constantsSrc.format(
+                directClass.orNull ?: "",
+                verifyClass.orNull ?: ""
+            )
+        )
     }
 }

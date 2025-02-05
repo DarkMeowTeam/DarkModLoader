@@ -1,15 +1,7 @@
 plugins {
-    id("net.darkmeow.jar-optimizer").version("1.0.1113")
-    id("com.github.johnrengelman.shadow").version("7.1.2")
+    id("net.darkmeow.jar-optimizer") version "1.0.1113"
+    id("com.github.johnrengelman.shadow") version "8.1.0"
     id("maven-publish")
-}
-
-repositories {
-    maven("https://maven.minecraftforge.net/")
-    maven("https://libraries.minecraft.net/")
-
-    mavenCentral()
-    mavenLocal()
 }
 
 val configureSourceSet: SourceSet.() -> Unit = {

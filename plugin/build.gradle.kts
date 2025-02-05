@@ -6,14 +6,7 @@ plugins {
     kotlin("jvm")
     id("maven-publish")
 
-    id("com.github.johnrengelman.shadow").version("7.1.2")
-}
-
-repositories {
-    mavenCentral()
-    mavenLocal()
-
-    maven("https://maven.minecraftforge.net/")
+    id("com.github.johnrengelman.shadow") version "8.1.0"
 }
 
 dependencies {
@@ -63,7 +56,7 @@ publishing {
             from(components["java"])
             groupId = "net.darkmeow"
             artifactId = "mod-loader-plugin"
-            version = "1.0.1221"
+            version = "1.1.0205"
         }
     }
     repositories {

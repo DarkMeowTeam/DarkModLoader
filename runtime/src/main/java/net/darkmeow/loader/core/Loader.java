@@ -1,5 +1,6 @@
 package net.darkmeow.loader.core;
 
+import net.darkmeow.loader.core.utils.VerifyUtils;
 import org.tukaani.xz.XZInputStream;
 
 import java.io.*;
@@ -16,24 +17,24 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class Loader {
-    public static final File LOADER_DIR = new File(new File(System.getProperty("java.io.tmpdir")), "DarkLoader");
-
     public static URL loadMod() {
-        return load();
-    }
-
-    private static URL load() {
         try {
             File file = loadFile();
-            return file.toURI().toURL();
+            final URL url = file.toURI().toURL();
+            return VerifyUtils.isAllowLoad(url) ? url : null;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private static File loadFile() throws IOException, NoSuchAlgorithmException {
-        LOADER_DIR.mkdirs();
+        final File loaderDir = new File(new File(System.getProperty("java.io.tmpdir")), "DarkLoader");
+
+        if (!loaderDir.exists()) {
+            if (!loaderDir.mkdirs()) {
+                throw new IOException("Failed to create directory " + loaderDir.getAbsolutePath());
+            }
+        }
 
         byte[] bytes;
         final String checksum;
@@ -45,7 +46,7 @@ public class Loader {
 
         // 不能移除 jar 后缀
         // 否则会破坏 Reflections
-        File jarFile = new File(LOADER_DIR, checksum.toLowerCase(Locale.ROOT) + ".jar");
+        File jarFile = new File(loaderDir, checksum.toLowerCase(Locale.ROOT) + ".jar");
 
         if (jarFile.exists()) {
             return jarFile;

@@ -1,6 +1,6 @@
-package net.darkmeow.loader.core.ui;
+package net.darkmeow.loader.ui;
 
-import net.darkmeow.loader.DirectLoader;
+import net.darkmeow.loader.loaders.DirectLoader;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

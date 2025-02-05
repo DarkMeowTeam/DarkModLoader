@@ -1,7 +1,7 @@
-package net.darkmeow.loader;
+package net.darkmeow.loader.loaders;
 
 import net.darkmeow.loader.core.Loader;
-import net.darkmeow.loader.core.ui.GuiLoading;
+import net.darkmeow.loader.ui.GuiLoading;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
@@ -13,18 +13,19 @@ import java.net.URLClassLoader;
 import java.util.Map;
 
 public class LegacyForgeLoader implements IFMLLoadingPlugin {
-    public LegacyForgeLoader() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        GuiLoading.display();
+    public LegacyForgeLoader() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException {
+        final URL mod = Loader.loadMod();
 
-        final URL unPackedMod = Loader.loadMod();
+        if (mod != null) {
+            GuiLoading.display();
 
-        LaunchClassLoader launchClassLoader = Launch.classLoader;
-        ClassLoader appClassLoader = LaunchClassLoader.class.getClassLoader();
+            Method addURLMethod = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+            addURLMethod.setAccessible(true);
+            addURLMethod.invoke(LaunchClassLoader.class.getClassLoader(), mod);
+            addURLMethod.invoke(Launch.classLoader, mod);
 
-        Method addURLMethod = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-        addURLMethod.setAccessible(true);
-        addURLMethod.invoke(appClassLoader, unPackedMod);
-        addURLMethod.invoke(launchClassLoader, unPackedMod);
+            Class.forName("org.spongepowered.asm.launch.MixinBootstrap", true, LaunchClassLoader.class.getClassLoader()).getDeclaredMethod("init").invoke(null);
+        }
     }
 
     @Override
