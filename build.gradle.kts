@@ -1,6 +1,6 @@
 allprojects {
     group = "net.darkmeow"
-    version = "1.1.0205"
+    version = "1.1.0216"
 }
 
 plugins {
@@ -23,6 +23,7 @@ subprojects {
     base {
         archivesName.set("${rootProject.name}-${project.name}")
     }
+
     tasks {
         withType<JavaCompile> {
             options.encoding = "UTF-8"

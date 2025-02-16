@@ -7,4 +7,6 @@ abstract class ModLoaderExtension {
     abstract val forgeModClass: Property<String>
 
     abstract val verifyClass: Property<String>
+
+    abstract val disableSplash: Property<Boolean>
 }

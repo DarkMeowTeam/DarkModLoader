@@ -17,6 +17,8 @@ dependencies {
 
     implementation("org.ow2.asm:asm-commons:9.4")
     implementation("org.ow2.asm:asm-tree:9.4")
+
+    implementation("com.github.oshi:oshi-core:6.6.6")
 }
 
 gradlePlugin {
@@ -56,7 +58,7 @@ publishing {
             from(components["java"])
             groupId = "net.darkmeow"
             artifactId = "mod-loader-plugin"
-            version = "1.1.0205"
+            version = "1.1.0216"
         }
     }
     repositories {

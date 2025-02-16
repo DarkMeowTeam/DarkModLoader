@@ -45,6 +45,7 @@ abstract class ModPackagingTask : DefaultTask() {
     @TaskAction
     fun packageMod() {
         val outputFile = File(File(outputFile.get().asFile, "META-INF"), "NATIVE")
+        outputFile.delete()
         outputFile.parentFile.mkdirs()
 
         val rawStream = outputFile.outputStream().buffered(16 * 1024)

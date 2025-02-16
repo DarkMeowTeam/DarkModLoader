@@ -36,6 +36,8 @@ class ModLoaderPlugin : Plugin<Project> {
 
             generateConstants.verifyClass.set(extension.verifyClass)
 
+            generateConstants.disableSplash.set(extension.disableSplash)
+
             generateConstants.platformJars.set(platformJarFiles)
         }
 

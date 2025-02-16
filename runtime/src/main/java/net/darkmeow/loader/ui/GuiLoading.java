@@ -1,5 +1,6 @@
 package net.darkmeow.loader.ui;
 
+import net.darkmeow.loader.core.Constants;
 import net.darkmeow.loader.loaders.DirectLoader;
 
 import javax.imageio.ImageIO;
@@ -12,18 +13,20 @@ import java.util.Objects;
 public class GuiLoading {
 
     public static void display() {
-        new Thread(() -> {
-            try {
-                GuiLoading gui = new GuiLoading();
-                gui.init();
+        if (!Constants.DISABLE_SPLASH) {
+            new Thread(() -> {
+                try {
+                    GuiLoading gui = new GuiLoading();
+                    gui.init();
 
-                Thread.sleep(5000);
+                    Thread.sleep(5000);
 
-                gui.close();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
+                    gui.close();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        }
     }
 
     public JFrame frame;

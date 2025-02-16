@@ -1,5 +1,6 @@
 package net.darkmeow.loader
 
+import net.darkmeow.loader.utils.DeviceUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
@@ -8,6 +9,8 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.jar.Attributes
 import java.util.jar.Manifest
 import javax.inject.Inject
@@ -26,6 +29,10 @@ abstract class GenerateConstantsTask : DefaultTask() {
     @get:Optional
     @get:Input
     internal abstract val verifyClass: Property<String>
+
+    @get:Optional
+    @get:Input
+    internal abstract val disableSplash: Property<Boolean>
 
     @get:InputFiles
     internal abstract val platformJars: Property<FileCollection>
@@ -115,6 +122,11 @@ abstract class GenerateConstantsTask : DefaultTask() {
         public final class Constants {
             public static String DIRECT_CLASS = "%s";
             public static String VERIFY_CLASS = "%s";
+            
+            public static boolean DISABLE_SPLASH = %s;
+            
+            public static String BUILD_DEVICE = "%s";
+            public static String BUILD_DATA = "%s";    
         }
     """.trimIndent()
 
@@ -124,7 +136,10 @@ abstract class GenerateConstantsTask : DefaultTask() {
         File(dir, "Constants.java").writeText(
             constantsSrc.format(
                 directClass.orNull ?: "",
-                verifyClass.orNull ?: ""
+                verifyClass.orNull ?: "",
+                disableSplash.getOrElse(false).toString(),
+                DeviceUtils.getDeviceHardwareId(),
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/dd/MM HH:mm:ss"))
             )
         )
     }

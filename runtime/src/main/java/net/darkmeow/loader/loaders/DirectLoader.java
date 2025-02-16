@@ -12,6 +12,13 @@ public class DirectLoader {
 
     @SuppressWarnings("all")
     public static void main(String[] args) {
+        if (args.length == 1 && args[0].equals("--build-info")) {
+            System.out.println("Build Device: " + Constants.BUILD_DEVICE);
+            System.out.println("Build Date: " + Constants.BUILD_DATE);
+            System.out.flush();
+            return;
+        }
+
         final URL url = Loader.loadMod();
 
         if (url != null) {
